@@ -28,7 +28,7 @@ from LinearRegressionPosteriorPredictiveEstimator import LinearRegressionPosteri
 
 if __name__ == '__main__':
     # Load and unpack training and test data
-    data_dir = os.path.abspath('../data/') # FIXME if you move the data dir
+    data_dir = os.path.abspath('../unit2_CP/data/') # FIXME if you move the data dir
     train_csv_fpath = os.path.join(data_dir, 'toywave_train.csv')
     test_csv_fpath = os.path.join(data_dir, 'toywave_test.csv')
     train_df = pd.read_csv(train_csv_fpath)
@@ -59,8 +59,6 @@ if __name__ == '__main__':
         start_time = time.time()
         for order in order_list:
             feature_transformer = PolynomialFeatureTransform(order=order, input_dim=1)
-
-
             param_list = list()
             score_list = list()
             estimator_list = list()
@@ -69,13 +67,13 @@ if __name__ == '__main__':
                 ppe_estimator = LinearRegressionPosteriorPredictiveEstimator(
                     feature_transformer, alpha=alpha, beta=beta)
                 ## TODO call fit_and_calc_log_evidence to get score for search
-                score = 0.0
+                score = ppe_estimator.fit_and_calc_log_evidence(x_train_ND[:N], t_train_N[:N])
                 score_list.append(score)
                 param_list.append(dict(alpha=alpha, beta=beta))
                 estimator_list.append(ppe_estimator)
 
             ## Select best scoring hyperparameters
-            best_id = 0 # TODO identify the best scoring entry in the score list
+            best_id = np.argmax(score_list) # TODO identify the best scoring entry in the score list
             best_score = score_list[best_id]
             best_estimator = estimator_list[best_id]
 
@@ -127,8 +125,8 @@ if __name__ == '__main__':
         print("required time = %.2f sec" % (time.time() - start_time))
 
     ## Finalize figure 3b
-    plt.xlabel('TODO fixme')
-    plt.ylabel('TODO fixme') 
+    plt.xlabel('Polynomial Order')
+    plt.ylabel('Model Evidence') 
     plt.legend(loc='upper left')
     plt.ylim([-1.4, 0.1]) # don't touch these, should be just fine
     plt.tight_layout()

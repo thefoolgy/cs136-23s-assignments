@@ -34,7 +34,10 @@ def calc_target_log_pdf(z_D):
         Log probability density function value at provided input
     '''
     # TODO compute logpdf of target distribution at z_D
-    return -0.5 * np.sum(np.square(z_D)) # TODO FIXME
+    mu_D = np.asarray([-1.0, 1.0])
+    cov_DD = np.asarray([[2.0, 0.95], [0.95, 1.0]])
+    #return scipy.stats.multivariate_normal.logpdf(z_D, mean=mu_D, cov=cov_DD)
+    return -0.5 * (z_D-mu_D).T@np.linalg.inv(cov_DD)@(z_D-mu_D)- 0.5 * np.log(np.linalg.det(cov_DD)) - len(mu_D) / 2 * np.log(2 * np.pi) # TODO FIXME
 
 if __name__ == '__main__':
     n_burnin_samples = 5000   
@@ -62,15 +65,17 @@ if __name__ == '__main__':
 
         # TODO Create samplers and run them for specified num iterations
         # Make sure to provide rw_stddev_D and random_state as args
-
+        sampler = RandomWalkSampler(calc_target_log_pdf, [rw_stddev_D], random_state)
+        zA_D_list, infoA = sampler.draw_samples(z_initA_D, n_keep_samples, n_burnin_samples)
+        zB_D_list, infoB = sampler.draw_samples(z_initB_D, n_keep_samples, n_burnin_samples)
         # TODO Stack list of samples into a 2D array of size (S, D)
         # Remember, the samples in returned list *already discard* burnin
-        zA_SD = prng.randn(n_keep_samples, 2)  # FIXME
-        zB_SD = prng.randn(n_keep_samples, 2)  # FIXME
+        zA_SD =  np.stack(zA_D_list)# FIXME
+        zB_SD = np.stack(zB_D_list)  # FIXME
 
         # TODO unpack info about accept rates
-        arA = 0.0 # FIXME use infoA returned by samplerA.draw_samples(...)
-        arB = 0.0 # FIXME use infoB returned by samplerA.draw_samples(...)
+        arA = infoA['accept_rate'] # FIXME use infoA returned by samplerA.draw_samples(...)
+        arB = infoB['accept_rate'] # FIXME use infoB returned by samplerA.draw_samples(...)
 
         # Plot samples as scatterplot
         # Use small alpha transparency to visually debug rare/frequent samples
@@ -99,6 +104,6 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     # TODO uncomment to save figure for report
-    #plt.savefig("problem1_figure.png", bbox_inches='tight', pad_inches=0)
-    #plt.savefig("problem1_figure.pdf", bbox_inches='tight', pad_inches=0)
+    plt.savefig("problem1_figure.png", bbox_inches='tight', pad_inches=0)
+    # plt.savefig("problem1_figure.pdf", bbox_inches='tight', pad_inches=0)
     plt.show()

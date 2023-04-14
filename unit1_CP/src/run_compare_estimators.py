@@ -35,6 +35,8 @@ if __name__ == '__main__':
         print(f)
     train_word_list = load_lowercase_word_list_from_file(train_fpaths)
     test_word_list = load_lowercase_word_list_from_file(test_fpaths)
+    print(len(train_word_list))
+    print(len(test_word_list))
 
     # Create vocabulary from all words
     all_word_list = train_word_list + test_word_list
@@ -58,25 +60,40 @@ if __name__ == '__main__':
     mle_scores = -7.5 + np.zeros_like(frac_train_list)
     map_scores = -8.0 + np.zeros_like(frac_train_list)
     ppe_scores = -8.5 + np.zeros_like(frac_train_list)
+    baseline_scores = -9.0 + np.zeros_like(frac_train_list)
 
     # TODO loop over all train set sizes in `n_train_list`
     # ---- fit ML Estimator on train, then score it on test set
     # ---- fit MAP Estimator on train, then score it on test set
     # ---- fit PosteriorPredictive Estimator on train, then score it on test set
-
+    mleEst = MLEstimator(vocab, epsilon_unseen_proba)
+    mapEst = MAPEstimator(vocab, alpha)
+    postEst = PosteriorPredictiveEstimator(vocab, alpha)
+    for i in range(len(n_train_list)):
+        mleEst.fit(train_word_list[:n_train_list[i]])
+        mle_scores[i] = mleEst.score(test_word_list)
+        mapEst.fit(train_word_list[:n_train_list[i]])
+        map_scores[i] = mapEst.score(test_word_list)
+        postEst.fit(train_word_list[:n_train_list[i]])
+        ppe_scores[i] = postEst.score(test_word_list)
+        baseline_scores[i] = np.log(1/vocab.size)
+    print(mle_scores)
+    print(map_scores)
+    print(ppe_scores)
     fig_h, ax_h = plt.subplots(nrows=1, ncols=1, squeeze=True, figsize=(6, 4))
     arange_list = np.arange(len(n_train_list))
     ax_h.plot(arange_list, mle_scores, 'm.-', label='ML estimator')
     ax_h.plot(arange_list, map_scores, 'b.-', label='MAP estimator')
     ax_h.plot(arange_list, ppe_scores, 'g.-', label='PosteriorPred estimator')
+    ax_h.plot(arange_list, baseline_scores, 'r.-', label='baseline')
 
     ax_h.set_xticks([a for a in arange_list[1::2]])
     ax_h.set_xticklabels(['%dk' % (a/1000) for a in n_train_list][1::2])
     ax_h.set_xlim([-0.05, 1.05*max(arange_list)])
     ax_h.set_ylim([-10.1, -6.6])
 
-    plt.xlabel("TODO fill xlabel")
-    plt.ylabel("TODO fill ylabel")
+    plt.xlabel("amount of available training data")
+    plt.ylabel("estimated per-word log probability")
     plt.legend(loc='lower right')
     plt.tight_layout();
     plt.show()

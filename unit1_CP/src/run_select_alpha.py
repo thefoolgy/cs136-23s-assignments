@@ -63,8 +63,16 @@ def calc_per_word_log_evidence(estimator, word_list):
     assert isinstance(estimator, PosteriorPredictiveEstimator)
 
     # TODO Fit the estimator to the words
+    estimator.fit(word_list)
     # TODO Calculate the log evidence using provided formulas in CP1 spec
-    log_evidence = 0.0
+    gamma_nv_alpha_product = 1
+    gamma_alpha_product = 1
+    for i in range(estimator.vocab.size):
+        gamma_nv_alpha_product += gammaln(estimator.count_V[i] + estimator.alpha)
+        gamma_alpha_product += gammaln(estimator.alpha)
+    gamma_N_plus_Valpha = gammaln(estimator.total_count + estimator.vocab.size*(estimator.alpha))
+    gamma_Valpha = gammaln(estimator.vocab.size*(estimator.alpha))
+    log_evidence = (gamma_Valpha + gamma_nv_alpha_product) - (gamma_N_plus_Valpha + gamma_alpha_product)
 
     # Return the per word log evidence
     return log_evidence / float(len(word_list))
@@ -114,6 +122,10 @@ if __name__ == '__main__':
         # TODO fit an estimator to each alpha value
         # TODO evaluate training set's log evidence at each alpha value
         # TODO evaluate test set's estimated probability via estimator's 'score'
+        for i in range(len(alpha_list)):
+            ppe = PosteriorPredictiveEstimator(vocab, alpha=alpha_list[i])
+            train_log_ev_list[i] = calc_per_word_log_evidence(ppe, train_word_list[:n_train_list[nn]])
+            test_log_lik_list[i] = ppe.score(test_word_list)
 
         best_ii_test = np.argmax(test_log_lik_list)
         best_ii_train = np.argmax(train_log_ev_list)
@@ -135,8 +147,8 @@ if __name__ == '__main__':
         ax_grid[nn].set_ylim([-10.1, -6.6])
 
         # TODO add appropriate labels
-        ax_grid[nn].set_xlabel('TODO label x axis')
+        ax_grid[nn].set_xlabel('value of alpha')
         if nn == 0:
-            ax_grid[nn].set_ylabel('TODO label y axis')
+            ax_grid[nn].set_ylabel('per word log evidence and per word log probability')
     plt.tight_layout()
     plt.show()

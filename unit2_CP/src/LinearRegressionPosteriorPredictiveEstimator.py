@@ -88,9 +88,16 @@ class LinearRegressionPosteriorPredictiveEstimator():
         self. Internal attributes updated.
         '''
         phi_NM = self.feature_transformer.transform(x_ND)
-        ## TODO update mean_M and precision_MM via Bishop PRML formulas 
-        self.mean_M = np.zeros(self.M)
-        self.precision_MM = np.zeros((self.M, self.M))
+        ## TODO update mean_M and precision_MM via Bishop PRML formulas
+        I_m = np.eye(self.M)
+        S_0 = (1/self.alpha) * I_m
+        m_0 = np.zeros(self.M)
+        S_N = np.linalg.inv(S_0)+self.beta*(phi_NM.T@phi_NM)
+        S_0_inv = np.linalg.inv(S_0)
+        S_N_inv = np.linalg.inv(S_N)
+        m_n= S_N_inv @ (S_0_inv @ m_0 + self.beta * (phi_NM.T @ t_N))
+        self.mean_M = m_n
+        self.precision_MM = S_N
         return self
 
     def predict(self, x_ND):
@@ -111,7 +118,7 @@ class LinearRegressionPosteriorPredictiveEstimator():
         phi_NM = self.feature_transformer.transform(x_ND)
         N, M = phi_NM.shape
         ## TODO compute mean of predictive
-        return np.zeros(N)
+        return self.mean_M @ phi_NM.T
 
     def predict_variance(self, x_ND):
         ''' Make predictions of output variance for each provided input feature vectors
@@ -131,7 +138,10 @@ class LinearRegressionPosteriorPredictiveEstimator():
         phi_NM = self.feature_transformer.transform(x_ND)
         N, M = phi_NM.shape
         ## TODO compute variance of predictive
-        return 0.1 * np.ones(N)
+        var = np.ones((N,))
+        for i in range(N):
+            var[i] = (1/self.beta + phi_NM[i] @ np.linalg.inv(self.precision_MM) @ phi_NM[i].T)
+        return var
 
     def score(self, x_ND, t_N):
         ''' Compute the average log probability of provided dataset
@@ -202,4 +212,7 @@ class LinearRegressionPosteriorPredictiveEstimator():
         N, M = phi_NM.shape
         
         ## TODO perform evidence calculation
-        return 0.0
+        I_m = np.eye(self.M)
+        A = self.alpha*I_m + self.beta * (phi_NM.T @ phi_NM)
+        E_mn = (self.beta/2) * np.dot((t_N - phi_NM@self.mean_M),(t_N - phi_NM@self.mean_M)) + (self.alpha/2)*(self.mean_M.T@self.mean_M)
+        return ((M/2)*np.log(self.alpha) + (N/2)*np.log(self.beta) -E_mn - (1/2)*np.log(np.linalg.det(A)) - (N/2)*np.log(2*np.pi))/N

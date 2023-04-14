@@ -31,7 +31,7 @@ if __name__ == '__main__':
     N = 8 
 
     # Load and unpack training and test data
-    data_dir = os.path.abspath('../data/')
+    data_dir = os.path.abspath('../unit2_CP/data/')
     train_csv_fpath = os.path.join(data_dir, 'toywave_train.csv')
     test_csv_fpath = os.path.join(data_dir, 'toywave_test.csv')
     train_df = pd.read_csv(train_csv_fpath)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         # Obtain predicted mean and stddev for PPE estimator
         # at each x value in provided dense grid of size G
         ppe_mean_G = ppe_estimator.predict(xgrid_G1)
-        ppe_stddev_G = np.ones(ppe_mean_G.size) # TODO FIXME predict_variance
+        ppe_stddev_G = ppe_estimator.predict_variance(xgrid_G1) # TODO FIXME predict_variance
 
         regr_viz_utils.plot_predicted_mean_with_filled_stddev_interval(
             cur_ppe_ax, # plot on PPE figure's current axes

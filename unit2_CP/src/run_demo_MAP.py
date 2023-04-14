@@ -25,13 +25,15 @@ if __name__ == '__main__':
 
     # Set precisions of prior (alpha) and likelihood (beta)
     alpha_list = 0.01 * np.ones(3)
-    beta_list = 4.0 * np.ones(3) 
+    # beta_list = 4.0 * np.ones(3) 
+    # beta_list = 100.0 * np.ones(3) 
+    beta_list = 2500.0 * np.ones(3) 
 
     # Set training set size
     N = 8 
 
     # Load and unpack training and test data
-    data_dir = os.path.abspath('../data/')
+    data_dir = os.path.abspath('../unit2_CP/data/')
     train_csv_fpath = os.path.join(data_dir, 'toywave_train.csv')
     test_csv_fpath = os.path.join(data_dir, 'toywave_test.csv')
     train_df = pd.read_csv(train_csv_fpath)
@@ -62,7 +64,9 @@ if __name__ == '__main__':
         # Obtain predicted mean and stddev for MAP estimator
         # at each x value in provided dense grid of size G
         map_mean_G = map_estimator.predict(xgrid_G1)
-        map_stddev_G = np.ones(map_mean_G.size) # TODO FIXME predict_variance
+        map_stddev_G = map_estimator.predict_variance(xgrid_G1) # TODO FIXME predict_variance
+        
+        print(map_estimator.score(x_train_ND[:N], t_train_N[:N]))
 
         regr_viz_utils.plot_predicted_mean_with_filled_stddev_interval(
             cur_map_ax, # plot on MAP figure's current axes

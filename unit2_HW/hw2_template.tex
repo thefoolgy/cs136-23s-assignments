@@ -10,6 +10,7 @@
 %% Hyperlinks always black, no weird boxes
 \usepackage[hyphens]{url}
 \usepackage[colorlinks=true,allcolors=black,pdfborder={0 0 0}]{hyperref}
+\usepackage{mathtools}
 
 %%% Math typesetting
 \usepackage{amsmath,amssymb}
@@ -39,22 +40,22 @@
 
 ~~\\ %% add vertical space
 
-{\Large{\bf Student Name: TODO}}
+{\Large{\bf Student Name: Guangyu Lin}}
 
 \Large{\bf Collaboration Statement:}
 
-Total hours spent: TODO
+Total hours spent: 72 hours
 
 I discussed ideas with these individuals:
 \begin{itemize}
-\item TODO
-\item TODO
+\item Mingyang Wu
+\item Office hour with TA and Professor
 \item $\ldots$	
 \end{itemize}
 
 I consulted the following resources:
 \begin{itemize}
-\item TODO
+\item Bishop's textbook
 \item TODO
 \item $\ldots$	
 \end{itemize}
@@ -79,7 +80,31 @@ Compute the expected value of estimator $\hat{\sigma}^2(x_1, \ldots x_N)$, where
 }
 
 \subsection{1a: Solution}
-TODO YOUR SOLUTION HERE
+$\mathbb{E}[\hat{\sigma}^2(x_1, \ldots x_N)]$ substitute the definition given by problem
+\\
+\\
+=$\mathbb{E}[\frac{1}{N}\sum_{n=1}^N (x_n - \mu_{\text{true}})^2]$ expand the $(x_n - \mu_{\text{true}})^2$
+\\
+\\
+= $\mathbb{E}[\frac{1}{N}\sum_{n=1}^N(x_n^2-2x_{n}\mu_t+\mu_t^2)]$ then we can calculate the expectation to each term and since $\mu_t$ is a known parameter, we can regard it as a constant so we can move the $\mu_t$ outside of the expectation due to $\mathbb{E}[x+b] = \mathbb{E}[x]+b$ when b is a constant. On the other hand, the $\frac{1}{N}$ canceled with the sum of N so we can just write $\mu_t^2$ at the outside
+\\
+\\
+= $\mathbb{E}[\frac{1}{N}\sum_{n=1}^N(x_n^2-2x_{n}\mu_t)] + \mu_t^2$ now we can do the expectation to each term
+\\
+\\
+= $\frac{1}{N}\sum_{n=1}^N(\mathbb{E}[x_n^2]-2\mathbb{E}[\mu_tx_n])+\mu_t^2$ since $\mu_t$ is a constant we can move the $\mu_t$ outside from the second term so $2\mathbb{E}[\mu_tx_n]$ can be written as $2\mu_t\mathbb{E}[x_n]$
+\\
+\\
+=$\frac{1}{N}\sum_{n=1}^N(\mathbb{E}[x_n^2]-2\mu_t\mathbb{E}[x_n])+\mu_t^2$ then by using the property of Gaussian distribution since our variable is drawn from Gaussian model we can find $\mathbb{E}[x_n^2]$ is $\mu_t^2 + \sigma_t^2$ and $\mathbb{E}[x_n]$ is $\mu_t$
+\\
+\\
+= $\frac{1}{N}\sum_{n=1}^N(\mu_t^2 + \sigma_t^2 - 2\mu_t^2)+\mu_t^2$ now we can cancel the outside sum with $\frac{1}{N}$
+\\
+\\
+= $\mu_t^2 + \sigma_t^2 - 2\mu_t^2+\mu_t^2$ simplify this equation
+\\
+\\
+= $\sigma_t^2$
 
 \officialdirections{
 \subsection*{1b: Problem Statement}
@@ -87,7 +112,7 @@ Using your result in 1a, explain if the estimator $\hat{\sigma}^2$ is biased or 
 }
 
 \subsection{1b: Solution}
-TODO YOUR SOLUTION HERE
+The estimator is unbiased. From the lecture, we derived the $\sigma_{ml}$ as $\frac{N-1}{N}\sigma_t^2$. And during that derivation process, $\sigma$ is an unknown parameter and we only have $\mu_{ml}$ which is calculated by the dataset that we collected as $\mu_{ml} = \frac{1}{N}\sum_{n=1}^Nx_n$. We are not sure about where we drawn these variables so $\mu_{ml}$ might be overestimated or underestimated. But for 1a, we have $\mu_{true}$ and $\sigma_{true}$ which are known parameter and using them to generate our variables. Therefore, we derived the expectation of $\hat{\sigma}^2$ is unbiased and based on our result $\frac{N-1}{N}\sigma_t^2 $ less than $ \sigma_t^2$.
 
 
 \officialdirections{
@@ -104,7 +129,30 @@ Show that $x$ has a multivariate Gaussian distribution.
 }
 
 \subsection{2a: Solution}
-TODO YOUR SOLUTION HERE
+$\log p(x) = \text{const} - \frac{1}{2}(x-\mu)^TS(x-\mu)$ we can write $(x-\mu)^T$ as $(x^T-\mu^T)$
+\\
+\\
+=$\text{const} - \frac{1}{2}[(x^T-\mu^T)S(x-\mu)]$ we can expand the $(x^T-\mu^T)S(x-\mu)$
+\\
+\\
+= $\text{const}-\frac{1}{2}[x^TSx-xTS\mu-\mu^TSx + \mu^TS\mu]$ since S is a symmetric and positive definite matrix $x^TS\mu$ and $\mu^TSx$ are the same thing and can be combined as one term
+\\
+\\
+= $\text{const}-\frac{1}{2}[x^TSx - 2\mu^TSx + \mu^TS\mu]$
+
+then we can derive the function $\log p(x) = \text{c} - \frac{1}{2} x^T A x + b^T x$
+\\
+\\
+$\log p(x) = \text{c} - \frac{1}{2} x^T A x + b^T x$ we can manipulate $x^T A x + b^T$ and write it into paranthesis
+\\
+\\
+=$\log p(x) = \text{c} - \frac{1}{2} (x^T A x - 2b^T x)$
+\\
+\\
+now we can compare this equation and the previous equation that we derived and do the pattern matches
+\\
+\\
+we can find $x^T A x$ corresponds with $x^TSx$ and $2b^T x$ corresponds with $2\mu^TSx$ and since $\mu^TS\mu$ is a constant, we can ignore it and move it to constant part. And now we can say $A\coloneqq S$ and $b^T \coloneqq \mu^TS$ in other words $b \coloneqq  \mu{S^T}$ As long as we know $S$ and $\mu$, we can write the function as $\log p(x) = \text{c} - \frac{1}{2} x^T A x + b^T x$ form.
 
 
 \officialdirections{
@@ -114,8 +162,24 @@ Show that we can write $S_{N+1}^{-1} = S_N^{-1} + vv^T$ for some vector $v \in \
 
 
 \subsection{3a: Solution}
-TODO YOUR SOLUTION HERE
-
+by definition of $S_N^-1$ given by the problem we can write the expression of $S_{N+1}^-1$
+\\
+\\
+ $S_{N+1}^-1 = \alpha{I_M}+\beta{\Phi_{1:N+1}^T\Phi_{1:N+1}}$ by the definiction of $\Phi_{1:N}$ we can write $\Phi_{1:N+1}^T\Phi_{1:N+1}$ as $\sum_{n}^{N+1}\phi(x_n)^T\phi(x_n)$ since the dimension of $\phi$ is $1*M$
+ \\
+ \\
+ = $\alpha{I_M}+\beta{\sum_{n}^{N+1}[\phi(x_n)^T\phi(x_n)]}$ now we can rewrite $\beta{\sum_{n}^{N+1}[\phi(x_n)^T\phi(x_n)]}$ as $\beta\sum_n^N[\phi(x_n)^T\phi(x_n)]+\beta\phi(x_{n+1})^T\phi(x_{n+1})$
+ \\
+ \\
+ = $\alpha{I_M}+\beta\sum_n^N[\phi(x_n)^T\phi(x_n)]+\beta\phi(x_{n+1})^T\phi(x_{n+1})$now we can find the first term $\alpha{I_M}+\beta\sum_n^N[\phi(x_n)^T\phi(x_n)]$ is exactly the definition of $S_N^-1$ so we can simplify the equation 
+ \\
+ \\
+ = $S_N^-1 + \beta\phi(x_{n+1})^T\phi(x_{n+1})$ now we can do the pattern matches and we can find $\beta\phi(x_{n+1})^T\phi(x_{n+1})$ can be written as $\sqrt{\beta}\phi(x_{n+1})^T*\sqrt{\beta}\phi(x_{n+1})$
+ \\
+ \\
+ by comparing with $vv^T$ we can say $v \coloneqq \sqrt{\beta}\phi(x_{n+1})^T$ and $v^T \coloneqq \sqrt{\beta}\phi(x_{n+1})$
+ 
+ 
 \officialdirections{
 \subsection*{3b: Problem Statement}
 Next, consider the following identity, which holds for any invertible matrix A:
@@ -126,7 +190,14 @@ Substitute $A = S_N^{-1}$ and $v$ as defined in 3a into the above. Simplify to w
 }
 
 \subsection{3b: Solution}
-TODO YOUR SOLUTION HERE
+by substituting $A = S_N^{-1}$  we can derive the equation that given by problem as 
+\\
+\\
+$(S_{N}^-1 + vv^T)^-1 = S_N - \frac{(S_Nv)(v^TS_N)}{1+v^TS_Nv}$ 
+\\
+by 3a, we know $S_{N+1}^-1 = S_N^{-1} + vv^T$ therefore we can written the previous equation as 
+\\
+$S_{N+1}^-1 = S_N - \frac{(S_Nv)(v^TS_N)}{1+v^TS_Nv}$
 
 \officialdirections{
 \subsection*{3c: Problem Statement}
@@ -135,7 +206,22 @@ Show that $\sigma^2_{N+1}(x_*) - \sigma^2_{N}(x_*) = \phi(x_*)^T \left[ S_{N+1} 
 
 
 \subsection{3c: Solution}
-TODO YOUR SOLUTION HERE
+$\sigma^2_{N+1}(x_*) - \sigma^2_{N}(x_*)$ substitute with the definition that give by problem
+\\
+\\
+= $[\beta^-1+\phi(x_*)^TS_{N+1}\phi(x_*)] - [\beta^-1+\phi(x_*)^TS_{N}\phi(x_*)]$ we can cancel the $\beta^-1$ term 
+\\
+\\
+= $\phi(x_*)^TS_{N+1}\phi(x_*) - \phi(x_*)^TS_{N}\phi(x_*)$ now we can factorize the equation by matrix multiplication law
+\\
+\\
+=$\phi(x_*)^T(S_{N+1}\phi(x_*)-S_N\phi(x_*))$ then we can do the same factorization towards $\phi(x_*)$ by matrix multiplication law
+\\
+\\
+= $\phi(x_*)^T(S_{N+1} - S_N)\phi(x_*)$
+\\
+\\
+= $\phi(x_*)^T \left[ S_{N+1} - S_{N} \right] \phi(x_*)$
 
 \officialdirections{
 \subsection*{3d: Problem Statement}
@@ -148,7 +234,17 @@ This would prove that the predictive variance *cannot increase* with each additi
 
 
 \subsection{3d: Solution}
-TODO YOUR SOLUTION HERE
+When $\sigma_{N+1}^2(x_*) \leq \sigma_N^2(x_*)$ it must satisfy $\phi(x_*)^T \left[ S_{N+1} - S_{N} \right] \phi(x_*) \leq 0$
+then we can substitute $S_{N+1} - S_{N}$ with its definition given by the problem and we can get 
+$\phi(x_*)^T \left[ S_N - \frac{S_Nvv^TS_N}{1+v^TS_NV} - S_N \right] \phi(x_*)$ $S_N$ will be canceled by each other
+\\
+ then we will only have $\phi(x_*)^T \left[  - \frac{S_Nvv^TS_N}{1+v^TS_NV}  \right] \phi(x_*)$
+ \\
+and it can be written as $[  - \frac{\phi(x_*)^TS_Nvv^TS_N\phi(x_*)}{1+v^TS_NV}] $
+\\
+now we can split the numerator as two terms, one is $\phi(x_*)^TS_Nv$ and another one is $v^TS_N\phi(x_*)$
+\\
+Since $S_N$ is the covariance matrix and it is def positive and symmetric, we can regard these two terms are same. Therefore, the numerator can be regard as $(\phi(x_*)^TS_Nv)^2$. And the quadratic form will always bigger or equal to 0. Then for the numerator, since we know $S_N$ is a covariance matrix then by its property we know $v^TS_Nv$ will always greater than or equal to 0. Therefore we can say $\frac{\phi(x_*)^TS_Nvv^TS_N\phi(x_*)}{1+v^TS_NV}$ must greater than or equal to 0. And since there is a negative sign before this term, we can say $ - \frac{\phi(x_*)^TS_Nvv^TS_N\phi(x_*)}{1+v^TS_NV}$ must less than or equal to 0. Therefore $\sigma_{N+1}^2(x_*) \leq \sigma_N^2(x_*)$ is true.
 
 
 

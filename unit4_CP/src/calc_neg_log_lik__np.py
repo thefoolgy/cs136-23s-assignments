@@ -85,11 +85,8 @@ def calc_neg_log_lik(x_ND, log_pi_K, mu_KD, stddev_KD):
     K = mu_KD.shape[0]
 
     ## TODO write code to compute the negative log likelihood
-    neg_log_lik_placeholder = np.sum(mu_KD) # FIXME
-
-
-
-
+    log_likelihood = np.sum(logsumexp(log_pi_K[np.newaxis, :] + np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], mu_KD, stddev_KD),axis = 2), axis = 1))
+    neg_log_lik_placeholder = -1 * log_likelihood # FIXME
 
     return neg_log_lik_placeholder
 

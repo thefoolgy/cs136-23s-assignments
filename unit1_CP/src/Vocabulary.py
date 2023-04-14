@@ -22,7 +22,7 @@ def load_lowercase_word_list_from_file(txt_path_list):
         "0123456789" + string.punctuation.replace("'",""))
     word_list = list()
     for txt_path in txt_path_list:
-        line_list = np.loadtxt(txt_path, dtype=str, delimiter=' \t\n', ndmin=1)
+        line_list = np.genfromtxt(txt_path, dtype=str, delimiter=' \t\n', ndmin=1)
         for line in line_list:
             line = line.translate(punc_remover)
             for word in line.split():

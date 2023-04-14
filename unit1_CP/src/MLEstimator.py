@@ -87,7 +87,13 @@ class MLEstimator():
         self.total_count = 0
         self.unseen_count = 0
         # TODO update total_count and unseen_count
+        self.total_count = len(word_list)
         # TODO update the count_V array
+        for i in range(len(word_list)):
+            word_idx = self.vocab.get_word_id(word_list[i])
+            self.count_V[word_idx] += 1
+        self.unseen_count = self.count_V.size - np.count_nonzero(self.count_V)
+        
 
     def predict_proba(self, word):
         ''' Predict probability of a given unigram under this model
@@ -109,7 +115,10 @@ class MLEstimator():
         '''
         # TODO calculate estimated proba of the provided word
         # TODO use count_V, total_count, unseen_count (set after calling fit)
-        return 1.0 / self.vocab.size  # TODO change this placeholder!
+        if self.count_V[self.vocab.get_word_id(word)] > 0:
+            return (1-self.epsilon_unseen_proba)*(self.count_V[self.vocab.get_word_id(word)]/self.total_count)
+        else:
+            return self.epsilon_unseen_proba * (1.0 / self.unseen_count)  # TODO change this placeholder!
 
     def score(self, word_list):
         ''' Compute the average log probability of words in provided list

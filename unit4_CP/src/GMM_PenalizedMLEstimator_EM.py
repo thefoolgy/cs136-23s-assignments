@@ -197,8 +197,19 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
         '''
         N = x_ND.shape[0]
         r_NK = np.zeros((N, self.K))
-        r_NK[:,0] = 1.0 # FIXME
+        # r_NK = np.exp((self.log_pi_K[np.newaxis, :]+np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], self.mu_KD, self.stddev_KD), axis=2))-
+                    # logsumexp(self.log_pi_K[np.newaxis, :]+np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], self.mu_KD, self.stddev_KD), axis=2), axis=1, keepdims=True))
         # TODO update r_NK to optimal value given current GMM parameters
+        stacked_denom = []
+        denom = logsumexp(self.log_pi_K[np.newaxis, :] + np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], self.mu_KD, self.stddev_KD),axis = 2),axis = 1)
+        for i in range(self.K):
+            log_pdf_ND = stats.norm.logpdf(x_ND, loc=self.mu_KD[i], scale=self.stddev_KD[i])
+            num = np.sum(log_pdf_ND, axis = 1)
+            r_NK[:, i] = self.log_pi_K[i] + num
+            stacked_denom.append(denom)
+        stacked_denom_ = np.column_stack(stacked_denom)
+        r_NK  = r_NK - stacked_denom_
+        r_NK = np.exp(r_NK) + 1e-16
         assert np.allclose(np.sum(r_NK, axis=1), 1.0)
         return r_NK
 
@@ -220,7 +231,7 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
             Must satisfy logsumexp(log_pi_K) == 0.0 (which means sum(exp(log_pi_K)) == 1.0)
         '''
         # TODO compute optimal update of log_pi_K (hint, update pi_K, then log)
-        log_pi_K = np.log(1.0/self.K * np.ones(self.K)) # FIXME
+        log_pi_K = np.log(np.sum(r_NK, axis = 0)/r_NK.shape[0]) # FIXME
         return log_pi_K
 
     def mstep__update_mu_KD(self, r_NK, x_ND):
@@ -242,6 +253,8 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
         '''
         ## TODO compute optimal update of mu_KD
         mu_KD = np.zeros((self.K, self.D)) # FIXME
+        for i in range(self.K):
+            mu_KD[i,:] = (r_NK[:,i].T @ x_ND) / np.sum(r_NK[:,i])
         return mu_KD
 
     def mstep__update_stddev_KD(self, r_NK, x_ND):
@@ -263,6 +276,10 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
         '''
         ## TODO compute optimal update of stddev_KD
         stddev_KD = np.ones((self.K, self.D))
+        for i in range(self.K):
+            num = (1 / (self.variance_penalty_spread * self.variance_penalty_mode)) + r_NK[:,i].T @ np.square(x_ND - self.mu_KD[i,:])
+            denom = (1 / (self.variance_penalty_spread * self.variance_penalty_mode * self.variance_penalty_mode)) + np.sum(r_NK[:,i])
+            stddev_KD[i,:] = np.sqrt(num/denom)
         return stddev_KD
 
     def fit(self, x_ND, x_valid_ND=None, verbose=True):
@@ -311,8 +328,8 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
                 va_score_message = ""
             else:
                 # TODO compute the per-pixel negative log likelihood on validation set
-                va_score_per_pixel = 0.0123 + self.seed / 10000.0 # FIXME
-                self.history['valid_score_per_pixel'].append(va_score_per_pixel)
+                va_score_per_pixel = calc_neg_log_lik(x_valid_ND, self.log_pi_K, self.mu_KD, self.stddev_KD)/ND # FIXME
+                self.history['valid_score_per_pixel'].append(-va_score_per_pixel)
                 va_score_message = "| valid score %9.6f" % (self.history['valid_score_per_pixel'][-1])
 
             ## E step
@@ -321,6 +338,7 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
                 # Verify the loss after E step is equal to the incomplete loss
                 loss_e = self.calc_EM_loss(r_NK, x_ND)
                 self.history['train_loss_em'].append(loss_e)
+                assert np.allclose(loss_with_penalty, loss_e)
                 ## TODO this should pass: assert np.allclose(loss_with_penalty, loss_e)
 
             ## M step
@@ -333,6 +351,7 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
                 # Verify the loss goes down after the M step
                 loss_m = self.calc_EM_loss(r_NK, x_ND)
                 self.history['train_loss_em'].append(loss_m)
+                assert loss_m <= loss_e + 1e-9
                 ## TODO this should pass: assert loss_m <= loss_e + 1e-9
 
             if verbose:

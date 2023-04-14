@@ -38,12 +38,17 @@ def calc_joint_log_pdf(z_D, t_N, phi_NM, w_prior, v_prior):
     w_M = z_D[:M]
     v_M = z_D[M:]
 
-    log_pdf_t = 0.0 # TODO compute likelhood log p(t_1, ... t_N | w, v)
+    mean_N, stddev_N = unpack_mean_N_and_stddev_N(z_D, phi_NM)
+    log_pdf_t = scipy.stats.norm.logpdf(t_N, loc=mean_N, scale=stddev_N).sum() # TODO compute likelhood log p(t_1, ... t_N | w, v)
     # HINT: use provided function unpack_mean_N_and_stddev_N
 
-    log_pdf_w = 0.0 # TODO compute prior log p(w)
+    log_pdf_w = scipy.stats.norm.logpdf(
+        w_M, loc=w_prior['mean'], scale=w_prior['stddev']
+    ).sum() # TODO compute prior log p(w)
     
-    log_pdf_v = 0.0 # TODO compute prior log p(v)
+    log_pdf_v = scipy.stats.norm.logpdf(
+        v_M, loc=v_prior['mean'], scale=v_prior['stddev']
+    ).sum() # TODO compute prior log p(v)
 
     return log_pdf_t + log_pdf_w + log_pdf_v
 
@@ -66,13 +71,20 @@ def calc_score(list_of_z_D, phi_RM, t_R):
         using Monte-Carlo approximation to marginal likelihood
     '''
     S = len(list_of_z_D)
+    log_likelihoods = []
     for ss in range(S):
         z_ss_D = list_of_z_D[ss]
+        mean_R, stddev_R = unpack_mean_N_and_stddev_N(z_ss_D, phi_RM)
+        log_likelihoods.append(
+            scipy.stats.norm.logpdf(t_R, loc=mean_R, scale=stddev_R)
+        )
         # Compute score formula for ss-th sample (see instructions)
         # Hint: Use unpack_mean_N_and_stddev_N
     # TODO aggregate across all S samples
     # Hint: use scipy.special.logsumexp to be numerically stable
-    return 0.0 # TODO FIXME
+    log_likelihoods = np.asarray(log_likelihoods)
+    score = np.mean(scipy.special.logsumexp(log_likelihoods, axis = 0) - np.log(S))
+    return score # TODO FIXME
 
 
 def unpack_mean_N_and_stddev_N(z_D, phi_NM):
@@ -186,9 +198,9 @@ def show_posterior_predictive_with_data(
 
 if __name__ == '__main__':
 
-    x_tr_N1, t_tr_N, x_test_R1, t_test_R = load_bird_data(data_dir='../data/')
+    x_tr_N1, t_tr_N, x_test_R1, t_test_R = load_bird_data(data_dir='/Users/thefoolgy/Desktop/cs136/cs136-23s-assignments/unit3_CP/data/')
 
-    order = 0
+    order = 2
     B = 200 # Num Burnin samples
     S = 500 # Num Keep samples
     random_state = 101

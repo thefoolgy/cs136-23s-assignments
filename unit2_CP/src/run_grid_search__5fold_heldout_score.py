@@ -28,7 +28,7 @@ from LinearRegressionMAPEstimator import LinearRegressionMAPEstimator
 
 if __name__ == '__main__':
     # Load and unpack training and test data
-    data_dir = os.path.abspath('../data/') # FIXME if you move the data dir
+    data_dir = os.path.abspath('../unit2_CP/data/') # FIXME if you move the data dir
     train_csv_fpath = os.path.join(data_dir, 'toywave_train.csv')
     test_csv_fpath = os.path.join(data_dir, 'toywave_test.csv')
     train_df = pd.read_csv(train_csv_fpath)
@@ -74,10 +74,10 @@ if __name__ == '__main__':
 
             # TODO Perform grid search on first N train points
             # Hint: call a method already provided by kfold_grid_searcher
-
+            kfold_grid_searcher.fit(x_train_ND[:N], t_train_N[:N])
             ## Select best scoring parameters
-            best_score = 0.0 # TODO FIXME get searcher's best score
-            best_estimator = default_estimator # TODO FIXME get searcher's best
+            best_score = kfold_grid_searcher.best_score_ # TODO FIXME get searcher's best score
+            best_estimator = kfold_grid_searcher.best_estimator_ # TODO FIXME get searcher's best
 
             estimator_per_order.append(best_estimator)
             score_per_order.append(best_score)            
@@ -95,7 +95,7 @@ if __name__ == '__main__':
                 t_train_N=t_train_N[:N],
                 color='b',
                 legend_label='MAP prediction',
-                )
+            )
 
         ## Add line to Fig 2b
         plt.figure(score_vs_N_fig.number)
@@ -128,8 +128,8 @@ if __name__ == '__main__':
 
 
     ## Finalize figure 2b
-    plt.xlabel('TODO fixme')
-    plt.ylabel('TODO fixme') 
+    plt.xlabel('Polynomial Order')
+    plt.ylabel('Model Score ') 
     plt.legend(loc='upper left')
     plt.ylim([-1.4, 0.1]) # don't touch these, should be just fine
     plt.tight_layout()

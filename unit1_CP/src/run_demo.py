@@ -30,6 +30,7 @@ if __name__ == '__main__':
     print("Using train word list of size %d" % len(train_word_list))
     print("Using test word list of size %d" % len(test_word_list))
 
+    # ML test
     # Create vocabulary from all words
     all_word_list = train_word_list + test_word_list
     vocab = Vocabulary(all_word_list)
@@ -48,3 +49,43 @@ if __name__ == '__main__':
         print("%.5f = Pr(word = '%s' )" % (
             proba, test_word
             ))
+            
+    #   MAP test
+    # Create vocabulary from all words
+    # all_word_list = train_word_list + test_word_list
+    # vocab = Vocabulary(all_word_list)
+    # print("Using vocab of size %d" % vocab.size)
+
+    # mapEst = MAPEstimator(vocab, 2)
+    # mapEst.fit(train_word_list)
+    # for test_word in test_word_list[:10]:
+    #     proba = mapEst.predict_proba(test_word)
+    #     print("%.5f = Pr(word = '%s' )" % (
+    #         proba, test_word
+    #         ))
+    # print("...")
+    # for test_word in test_word_list[-10:]:
+    #     proba = mapEst.predict_proba(test_word)
+    #     print("%.5f = Pr(word = '%s' )" % (
+    #         proba, test_word
+    #         ))
+
+    # Post test
+    # Create vocabulary from all words
+    # all_word_list = train_word_list + test_word_list
+    # vocab = Vocabulary(all_word_list)
+    # print("Using vocab of size %d" % vocab.size)
+
+    # postEst = PosteriorPredictiveEstimator(vocab, 2)
+    # postEst.fit(train_word_list)
+    # for test_word in test_word_list[:10]:
+    #     proba = postEst.predict_proba(test_word)
+    #     print("%.5f = Pr(word = '%s' )" % (
+    #         proba, test_word
+    #         ))
+    # print("...")
+    # for test_word in test_word_list[-10:]:
+    #     proba = postEst.predict_proba(test_word)
+    #     print("%.5f = Pr(word = '%s' )" % (
+    #         proba, test_word
+    #         ))
