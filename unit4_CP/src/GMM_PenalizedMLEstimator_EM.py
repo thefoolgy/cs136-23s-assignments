@@ -198,7 +198,7 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
         N = x_ND.shape[0]
         r_NK = np.zeros((N, self.K))
         # r_NK = np.exp((self.log_pi_K[np.newaxis, :]+np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], self.mu_KD, self.stddev_KD), axis=2))-
-                    # logsumexp(self.log_pi_K[np.newaxis, :]+np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], self.mu_KD, self.stddev_KD), axis=2), axis=1, keepdims=True))
+        #             logsumexp(self.log_pi_K[np.newaxis, :]+np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], self.mu_KD, self.stddev_KD), axis=2), axis=1, keepdims=True))
         # TODO update r_NK to optimal value given current GMM parameters
         stacked_denom = []
         denom = logsumexp(self.log_pi_K[np.newaxis, :] + np.sum(stats.norm.logpdf(x_ND[:, np.newaxis, :], self.mu_KD, self.stddev_KD),axis = 2),axis = 1)
@@ -306,6 +306,7 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
             Performance metrics stored after every iteration in history 
         '''
         N = np.maximum(x_ND.shape[0], 1.0)
+        valid_N = np.maximum(x_valid_ND.shape[0], 1.0)
 
         ## Define initial parameters
         if not hasattr(self, 'log_pi_K'):
@@ -317,6 +318,7 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
 
             ## Loss step
             ND = N * x_ND.shape[1]
+            valid_ND = valid_N * x_valid_ND.shape[1]
             tr_score = self.score(x_ND)
             loss_with_penalty = -1.0 * tr_score + self.calc_penalty_stddev()
             self.history['iter'].append(iter_id)
@@ -328,7 +330,7 @@ class GMM_PenalizedMLEstimator_EM(GMM_PenalizedMLEstimator):
                 va_score_message = ""
             else:
                 # TODO compute the per-pixel negative log likelihood on validation set
-                va_score_per_pixel = calc_neg_log_lik(x_valid_ND, self.log_pi_K, self.mu_KD, self.stddev_KD)/ND # FIXME
+                va_score_per_pixel = calc_neg_log_lik(x_valid_ND, self.log_pi_K, self.mu_KD, self.stddev_KD)/valid_ND # FIXME
                 self.history['valid_score_per_pixel'].append(-va_score_per_pixel)
                 va_score_message = "| valid score %9.6f" % (self.history['valid_score_per_pixel'][-1])
 

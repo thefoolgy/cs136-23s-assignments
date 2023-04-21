@@ -30,7 +30,7 @@ if __name__ == '__main__':
     x_test_ND = pd.read_csv("/Users/thefoolgy/Desktop/cs136/cs136-23s-assignments/unit4_CP/data/%s_x_test.csv" % dataset_name).values
 
     N, D = x_train_ND.shape
-    # K_list = [1, 4, 8, 16]
+    #K_list = [1, 4, 8, 16]
     K_list = [1]
     seed_list = [1001, 3001, 4001, 7001]
     max_iter = 20
@@ -51,7 +51,7 @@ if __name__ == '__main__':
                 variance_penalty_mode=25., variance_penalty_spread=100.0)
 
             print("Fitting with EM: K=%d seed=%d" % (K, seed))
-            gmm_em.fit(x_train_ND, x_test_ND)
+            gmm_em.fit(x_train_ND, x_valid_ND)
             
             gmm_em.write_history_to_csv("results_many_EM_runs/history_K=%02d_seed=%04d.csv" % (K, seed))
             visualize_gmm(gmm_em, K)
